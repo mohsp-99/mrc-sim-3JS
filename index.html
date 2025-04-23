@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>MRC 3D Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+      
+    <div id="container"></div>
+    <nav id="menubar">
+        <div class="menu">File</div>
+        <div class="menu">Edit</div>
+        <div class="menu">View</div>
+        <div class="menu">Help</div>
+    </nav>
+      
+    <div id="info">
+        <h1>MRC 3D Visualizer</h1>
+        <p>Click to add voxels, Shift+click to remove</p>
+    </div>
+    <div id="controls">
+        <button id="clear">Clear</button>
+        <button id="save">Save</button>
+        <label for="colorSelector">Voxel Color:</label>
+        <input type="color" id="colorSelector" value="#1e90ff">
+
+        <button id="toggleMode">Start Movement</button>
+        <button id="editBtn" disabled>Edit Module</button>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.module.min.js",
+                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>
