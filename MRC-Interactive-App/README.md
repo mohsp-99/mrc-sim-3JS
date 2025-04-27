@@ -1,3 +1,4 @@
+```markdown
 /project-root
 │
 ├── public/                  # static assets served as-is
@@ -38,3 +39,4 @@
 │
 ├── vite.config.js / webpack.config.js
 └── package.json
+```
