@@ -1,9 +1,7 @@
-// ---------- core imports ----------
-import { setupScene }   from './core/scene.js';
-import { setupCamera }  from './core/camera.js';
-import { setupRenderer }from './core/renderer.js';
-import { startLoop }    from './core/loop.js';
-import { setupControls }from './controls/OrbitControls.js';
+// -------------------------------------------------------------
+//  core imports   ⬅️  OLD utilities removed, SceneManager added
+// -------------------------------------------------------------
+import SceneManager       from './core/SceneManager.js';
 
 // ---------- UI layer ----------
 import {
@@ -17,7 +15,7 @@ import {
 } from './ui/ControlsPanel.js';
 
 // ---------- state & engine ----------
-import { Modes, getMode, setMode } from './core/appState.js';
+import { Modes, getMode, setMode } from './core/AppState.js';
 import { SelectionManager }        from './ui/SelectionManager.js';
 import Module                      from './engine/Module.js';
 import { MovementValidator }       from './engine/MovementValidator.js';
@@ -30,14 +28,19 @@ const BOUNDS = {
   max: new THREE.Vector3( 500, 500,  500),
 };
 
-// ---------- core scene setup ----------
-const {
-  scene, objects, cubeGeo, cubeMaterial, rollOverMesh,
-} = setupScene();
+// -------------------------------------------------------------
+//  core scene setup  ⬅️  SINGLE call boots everything
+// -------------------------------------------------------------
+SceneManager.init('#container');              // starts renderer + loop
 
-const camera   = setupCamera();
-const renderer = setupRenderer();
-const controls = setupControls(camera, renderer);
+// pull the bits old code expects
+const   scene     = SceneManager.getScene();
+const   objects   = SceneManager.getObjects();
+const { cubeGeo, cubeMaterial, rollOverMesh } = SceneManager.getPrimitives();
+
+const   camera    = SceneManager.getCamera();
+const   renderer  = SceneManager.getRenderer();
+const   controls  = SceneManager.getControls();
 
 // ---------- UI & build-mode bootstrapping ----------
 setupUI(scene, camera, objects, cubeGeo, cubeMaterial, rollOverMesh);
@@ -90,5 +93,8 @@ toggleBtn.addEventListener('click', () => {
   }
 });
 
-// ---------- main render loop ----------
-startLoop(renderer, scene, camera, controls, (dt) => selectionMgr.update(dt));
+// -------------------------------------------------------------
+//  main render hook  ⬅️  SceneManager already has the loop; we
+//                      just plug our per-frame callback into it
+// -------------------------------------------------------------
+SceneManager.setOnFrame((dt) => selectionMgr.update(dt));

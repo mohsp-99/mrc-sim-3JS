@@ -8,7 +8,7 @@ import {
   LineBasicMaterial,
   LineSegments,
 } from 'three';
-import { Modes, getMode } from '../core/appState.js';
+import { Modes, getMode } from '../core/AppState.js';
 import { DIRECTIONS } from '../engine/CollisionManager.js';
 
 // ---------- module-scope state ----------
