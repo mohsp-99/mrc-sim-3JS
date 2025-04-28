@@ -15,7 +15,8 @@ import {
 } from './ui/ControlsPanel.js';
 
 // ---------- state & engine ----------
-import { Modes, getMode, setMode } from './core/AppState.js';
+import appState, { Modes, setMode, getMode } from './core/AppState.js';
+import { loadState, saveState } from './core/Storage.js';
 import { SelectionManager }        from './ui/SelectionManager.js';
 import Module                      from './engine/Module.js';
 import { MovementValidator }       from './engine/MovementValidator.js';
@@ -41,6 +42,22 @@ const { cubeGeo, cubeMaterial, rollOverMesh } = SceneManager.getPrimitives();
 const   camera    = SceneManager.getCamera();
 const   renderer  = SceneManager.getRenderer();
 const   controls  = SceneManager.getControls();
+
+// --- RESTORE last mode and camera if saved ---
+const saved = loadState();
+if (saved) {
+  // --- restore camera pose ---
+  const { pos, look } = saved.camera || {};
+  if (pos && look) {
+    camera.position.set(pos.x, pos.y, pos.z);
+    camera.lookAt(look.x, look.y, look.z);
+  }
+
+  // --- restore app mode ---
+  if (saved.mode && Object.values(Modes).includes(saved.mode)) {
+    appState.setMode(saved.mode);
+  }
+}
 
 // ---------- UI & build-mode bootstrapping ----------
 setupUI(scene, camera, objects, cubeGeo, cubeMaterial, rollOverMesh);
@@ -98,3 +115,23 @@ toggleBtn.addEventListener('click', () => {
 //                      just plug our per-frame callback into it
 // -------------------------------------------------------------
 SceneManager.setOnFrame((dt) => selectionMgr.update(dt));
+
+// --- AUTOSAVE every 10 seconds ---
+setInterval(() => {
+  saveState({
+    mode: appState.mode,
+    camera: {
+      pos: {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+      },
+      look: (() => {
+        const target = new THREE.Vector3(0, 0, 0);
+        camera.getWorldDirection(target);
+        target.add(camera.position);
+        return { x: target.x, y: target.y, z: target.z };
+      })()
+    }
+  });
+}, 10_000); // every 10 seconds

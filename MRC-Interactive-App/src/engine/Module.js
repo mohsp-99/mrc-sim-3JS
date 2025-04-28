@@ -1,63 +1,54 @@
 // src/engine/Module.js
 import * as THREE from 'three';
 
-/**
- * Represents a single voxel module in the MRC system.
- * Stores its grid‑aligned position, neighbor map, and (optional) THREE.Mesh.
- */
+export const DIR = Object.freeze({
+  POS_X: 'posX',
+  NEG_X: 'negX',
+  POS_Y: 'posY',
+  NEG_Y: 'negY',
+  POS_Z: 'posZ',
+  NEG_Z: 'negZ'
+});
+
+/** One voxel-sized robot module. */
 export default class Module {
+  static _nextId = 1;
+
   /**
-   * @param {THREE.Vector3} position  – grid‑aligned world position
-   * @param {THREE.Mesh}     mesh      – reference to mesh in scene (optional)
+   * @param {THREE.Vector3} position  grid-aligned world position
+   * @param {THREE.Mesh=}   mesh      reference to mesh in scene
    */
   constructor(position, mesh = null) {
     this.id = Module._nextId++;
     this.position = position.clone();
     this.mesh = mesh;
 
-    // Neighbor metadata (null ⇒ no neighbor)
+    /** neighbour id or null per face */
     this.neighbors = {
-      posX: null,
-      negX: null,
-      posY: null,
-      negY: null,
-      posZ: null,
-      negZ: null,
+      [DIR.POS_X]: null, [DIR.NEG_X]: null,
+      [DIR.POS_Y]: null, [DIR.NEG_Y]: null,
+      [DIR.POS_Z]: null, [DIR.NEG_Z]: null
     };
 
-    /**
-     * Connection type for each neighbor (string placeholder, e.g. "rail-wagon").
-     * Only defined if neighbor exists.
-     */
-    this.connectionType = {}; // key = direction string, value = type
+    /** connection meta per face (type, stiffness…) */
+    this.connectionType = {};
 
-    // Cached string key for fast lookup in occupancy maps
-    this._key = this._makeKey(this.position);
+    this._key = Module.keyFrom(position);
   }
 
-  // -------------------- Helpers --------------------
-  /** String key such as "x,y,z" for Map usage */
-  _makeKey(v) {
-    return `${v.x},${v.y},${v.z}`;
-  }
+  // ---------- API ----------
+  /** Unique string "x,y,z" – handy for hash-maps */
+  static keyFrom(v) { return `${v.x},${v.y},${v.z}`; }
+  get key() { return this._key; }
 
-  /** Get unique key for current position */
-  get key() {
-    return this._key;
-  }
-
-  /** Move by grid‑aligned delta (does **not** update neighbor info) */
   translate(delta) {
     this.position.add(delta);
-    this._key = this._makeKey(this.position);
+    this._key = Module.keyFrom(this.position);
     if (this.mesh) this.mesh.position.copy(this.position);
   }
 
-  /** Update a neighbor reference & connection type */
-  setNeighbor(direction, moduleId, type = 'rigid') {
-    this.neighbors[direction] = moduleId;
-    this.connectionType[direction] = type;
+  setNeighbor(dir, moduleId, type = 'rigid') {
+    this.neighbors[dir] = moduleId;
+    this.connectionType[dir] = type;
   }
 }
-
-Module._nextId = 1;

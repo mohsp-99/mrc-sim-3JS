@@ -1,6 +1,7 @@
 // src/core/SceneManager.js   ✅ drop-in replacement
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { loadVoxelGeometry } from './ResourceLoader.js';
 
 /* ────────────────────────────────────────────────────────────
  *  Private singleton state
@@ -78,6 +79,14 @@ function init(container = '#container', onFrame) {
   });
   _rollOverMesh = new THREE.Mesh(_cubeGeo.clone(), rollOverMat);
   _scene.add(_rollOverMesh);
+
+  // load real voxel geometry (if available) and swap in-place
+  loadVoxelGeometry().then((geom) => {
+    _cubeGeo.dispose();
+    _cubeGeo       = geom;
+    _rollOverMesh.geometry.dispose();
+    _rollOverMesh.geometry = _cubeGeo.clone();
+  });
 
   // --- lights
   _scene.add(new THREE.AmbientLight(0x606060));
