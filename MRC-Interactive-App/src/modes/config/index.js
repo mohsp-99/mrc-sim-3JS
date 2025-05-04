@@ -1,81 +1,44 @@
-// src/modes/config/index.js
 import { buildLayout } from './layout.js';
-import { setupScene } from './scene-setup.js';
-import { setupInteractions } from './interaction.js';
-import { setupToolListeners, setupAutosave } from './tools.js';
+import { setupScene } from './state/setupScene.js';
+import { setupInteractions } from './state/setupInteractions.js';
+import { setupToolListeners, setupAutosave, stopAutosave } from './state/setupTools.js';
+import { mount as mountToolBar, unmount as unmountToolBar } from './ui/ToolBar.js';
+import { mount as mountModuleBar, unmount as unmountModuleBar } from './ui/ModuleBar.js';
+import { initGraph } from './ui/GraphView.js';
+import { createPlacementHandlers } from './logic/placement.js';
+import SelectionManager from './logic/SelectionManager.js';
 
-import * as THREE from 'three';
-import SelectionManager from '../../ui/SelectionManager.js';
-import { mount as mountToolBar, unmount as unmountToolBar, highlight as highlightTool } from '../../ui/ToolBar.js';
-import { mount as mountModuleBar, unmount as unmountModuleBar } from '../../ui/ModuleBar.js';
 import SceneManager from '../../core/SceneManager.js';
-import { initGraph } from '../../graph/GraphView.js';
-import ModuleGraph from '../../engine/ModuleGraph.js';
-import toolState, { Tool } from './ToolState.js';
+import { setMode, appState } from '../../core/AppState.js';
+import { modeState } from './state/modeState.js';
 import bus from '../../core/EventBus.js';
-import  { appState, setMode } from '../../core/AppState.js';
-import { posFrom } from '../../core/geometry.js';
-import Module  from '../../engine/Module.js';
-import { refreshGraph } from '../../graph/GraphView.js';
-
-let toolLsnr, keyLsnr, moveLsnr, downLsnr, autosaveId;
 
 export function init() {
   const { canvasBox } = buildLayout();
-  const { scene, objects, camera, controls, primitives } = setupScene();
-  const { cubeGeo, cubeMaterial } = primitives;
+  const { scene, objects, camera, controls, primitives } = setupScene(canvasBox);
   scene.userData.camera = camera;
 
+  const selectionMgr = new SelectionManager(scene, appState.graph);
+  SceneManager.setOnFrame(dt => selectionMgr.update(dt));
 
-
-  appState.selectionMgr = new SelectionManager(scene, appState.graph);
-  SceneManager.setOnFrame(dt => appState.selectionMgr.update(dt));
-
-  function addVoxel(hit) {
-    const pos = posFrom(hit);
-    if (objects.some(o => o.position.equals(pos))) return;
-  
-    const mesh = new THREE.Mesh(cubeGeo, cubeMaterial.clone());
-    mesh.position.copy(pos);
-    scene.add(mesh);
-    objects.push(mesh);
-  
-    const mod = new Module(pos, mesh);
-    mesh.__modId = mod.id;
-  
-    appState.graph.addModule(mod);
-    refreshGraph(appState.graph);
-  }
-  
-  function delVoxel(hit) {
-    const mesh = hit.object;
-    if (mesh === objects[0]) return;
-  
-    scene.remove(mesh);
-    objects.splice(objects.indexOf(mesh), 1);
-  
-    appState.graph.modules.delete(mesh.__modId);
-    refreshGraph(appState.graph);
-  }
-  
+  const { addVoxel, delVoxel } = createPlacementHandlers(scene, objects, primitives.cubeGeo, primitives.cubeMaterial);
 
   const dom = SceneManager.getRenderer().domElement;
   const handlers = setupInteractions(dom, objects, camera, {
     rollOverMesh: primitives.rollOverMesh,
     graph: appState.graph,
-    selectionMgr: appState.selectionMgr,
+    selectionMgr: selectionMgr,
     addVoxel,
     delVoxel
   });
 
-  moveLsnr = handlers.moveLsnr;
-  downLsnr = handlers.downLsnr;
-  keyLsnr  = handlers.keyLsnr;
+  modeState.moveLsnr = handlers.moveLsnr;
+  modeState.downLsnr = handlers.downLsnr;
+  modeState.keyLsnr  = handlers.keyLsnr;
 
-  toolLsnr = setupToolListeners(controls, primitives.rollOverMesh, appState.selectionMgr, highlightTool, toolState);
-  autosaveId = setupAutosave(camera);
-  
-  // Reuse AppState.graph and AppState.selectionMgr
+  modeState.toolLsnr = setupToolListeners(controls, primitives.rollOverMesh, selectionMgr);
+  modeState.autosaveId = setupAutosave(camera);
+
   mountToolBar(canvasBox);
   mountModuleBar(document.getElementById('moduleBarHost'));
   initGraph('#cy', appState.graph);
@@ -84,14 +47,14 @@ export function init() {
 }
 
 export function destroy() {
-  bus.off('toolChanged', toolLsnr);
-  document.removeEventListener('keydown', keyLsnr);
+  bus.off('toolChanged', modeState.toolLsnr);
+  document.removeEventListener('keydown', modeState.keyLsnr);
 
   const dom = SceneManager.getRenderer().domElement;
-  dom.removeEventListener('pointermove', moveLsnr);
-  dom.removeEventListener('pointerdown', downLsnr);
+  dom.removeEventListener('pointermove', modeState.moveLsnr);
+  dom.removeEventListener('pointerdown', modeState.downLsnr);
 
-  clearInterval(autosaveId);
+  stopAutosave(modeState.autosaveId);
   unmountToolBar();
   unmountModuleBar();
 

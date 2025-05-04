@@ -2,7 +2,6 @@
 
 import ModuleGraph from '../engine/ModuleGraph.js';
 import bus from './EventBus.js';
-import SelectionManager from '../ui/SelectionManager.js';
 
 export const appState = {
   // -------- Current app mode --------
@@ -18,7 +17,6 @@ export const appState = {
 
   // -------- View/UI state --------
   viewState   : null,                // { position, lookAt }
-  selection   : new Set()            // Set of selected module IDs
 };
 
 // -------- Setters that emit events --------

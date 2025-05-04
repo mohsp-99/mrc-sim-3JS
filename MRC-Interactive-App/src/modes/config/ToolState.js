@@ -7,7 +7,7 @@ export const Tool = Object.freeze({
   DELETE: 'tool.delete'
 });
 
-class ToolState {
+class toolState {
   #current = Tool.PAN;
 
   get current() { return this.#current; }
@@ -19,4 +19,4 @@ class ToolState {
   }
 }
 
-export default new ToolState();
+export default new toolState();
