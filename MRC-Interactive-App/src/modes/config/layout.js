@@ -103,19 +103,7 @@ function createToolbarButton(label, textColor, hoverBgColor) {
   button.setAttribute('aria-label', label);
   button.title = label;
   return button;
-}import toolState, { Tool } from '../modes/config/ToolState.js';
-
-// Icons for tool buttons
-const icons = {
-  [Tool.PAN]   : '🤚',
-  [Tool.ADD]   : '➕',
-  [Tool.SELECT]: '🖱️',
-  [Tool.DELETE]: '🗑️'
-};
-
-let toolPanelRoot = null;
-
-export function buildLayout() {
+}export function buildLayout() {
   const root = document.getElementById('root');
   root.innerHTML = '';
   root.classList.add('h-screen', 'w-screen', 'overflow-hidden');
@@ -130,9 +118,6 @@ export function buildLayout() {
   canvasBox.style.minWidth = '300px'; // Minimum width for canvas
   canvasBox.style.flex = '1 1 auto'; // Allow flex grow and shrink
   wrap.appendChild(canvasBox);
-
-  // Add Tool Panel to Canvas Box
-  addToolPanel(canvasBox);
 
   // HORIZONTAL RESIZER: Between Canvas and Right Panel
   const horizontalResizer = createResizer('horizontal');
@@ -193,44 +178,6 @@ export function buildLayout() {
   handleWindowResize(canvasBox, rightPanel, wrap);
 
   return { canvasBox };
-}
-
-/**
- * Adds the tool panel to the canvas box
- * @param {HTMLElement} canvasBox - The canvas container
- */
-function addToolPanel(canvasBox) {
-  // Create the tool panel container
-  toolPanelRoot = document.createElement('div');
-  toolPanelRoot.className = 'absolute top-24 left-2 flex flex-col space-y-1 p-1 bg-gray-800 text-white rounded';
-  
-  // Add tool buttons
-  Object.values(Tool).forEach(tool => {
-    const btn = document.createElement('button');
-    btn.textContent = icons[tool];
-    btn.title = tool.split('.')[1];
-    btn.className = 'w-8 h-8 text-lg hover:bg-teal-600 rounded focus:outline-none';
-    btn.onclick = () => toolState.set(tool);
-    btn.dataset.tool = tool;
-    toolPanelRoot.appendChild(btn);
-  });
-  
-  canvasBox.appendChild(toolPanelRoot);
-  
-  // Set initial tool highlight
-  highlightTool(Tool.PAN);
-}
-
-/**
- * Highlights the currently active tool
- * @param {string} tool - The tool to highlight
- */
-function highlightTool(tool) {
-  if (toolPanelRoot) {
-    toolPanelRoot.querySelectorAll('button').forEach(btn => {
-      btn.classList.toggle('bg-teal-600', btn.dataset.tool === tool);
-    });
-  }
 }
 
 /**
