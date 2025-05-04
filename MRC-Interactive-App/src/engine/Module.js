@@ -1,54 +1,57 @@
-// src/engine/Module.js
 import * as THREE from 'three';
 
 export const DIR = Object.freeze({
-  POS_X: 'posX',
-  NEG_X: 'negX',
-  POS_Y: 'posY',
-  NEG_Y: 'negY',
-  POS_Z: 'posZ',
-  NEG_Z: 'negZ'
+  POS_X: 'posX', NEG_X: 'negX',
+  POS_Y: 'posY', NEG_Y: 'negY',
+  POS_Z: 'posZ', NEG_Z: 'negZ'
 });
 
-/** One voxel-sized robot module. */
+/** One voxel‑sized robot module */
 export default class Module {
   static _nextId = 1;
 
   /**
-   * @param {THREE.Vector3} position  grid-aligned world position
-   * @param {THREE.Mesh=}   mesh      reference to mesh in scene
+   * @param {THREE.Vector3} position  grid‑aligned world position
+   * @param {THREE.Mesh=}   mesh      reference to mesh in scene (optional)
    */
   constructor(position, mesh = null) {
-    this.id = Module._nextId++;
+    this.id       = Module._nextId++;
     this.position = position.clone();
-    this.mesh = mesh;
+    this.mesh     = mesh;
 
-    /** neighbour id or null per face */
+    /* ---------- new physical / logical fields ---------- */
+    this.color    = '#1e90ff';   // default UI colour swatch
+    this.pinned   = false;       // fixed support for statics
+    this.mass     = 1.0;         // kg, default
+    this.metadata = {};          // free‑form user data
+
+    /* ---------- neighbours & connections ---------- */
     this.neighbors = {
-      [DIR.POS_X]: null, [DIR.NEG_X]: null,
-      [DIR.POS_Y]: null, [DIR.NEG_Y]: null,
-      [DIR.POS_Z]: null, [DIR.NEG_Z]: null
+      posX:null, negX:null, posY:null, negY:null, posZ:null, negZ:null
     };
-
-    /** connection meta per face (type, stiffness…) */
+    /** per‑face connection info: { type, mode, strength } */
     this.connectionType = {};
 
     this._key = Module.keyFrom(position);
   }
 
-  // ---------- API ----------
-  /** Unique string "x,y,z" – handy for hash-maps */
+  /* ---------- helpers ---------- */
   static keyFrom(v) { return `${v.x},${v.y},${v.z}`; }
   get key() { return this._key; }
 
   translate(delta) {
     this.position.add(delta);
     this._key = Module.keyFrom(this.position);
-    if (this.mesh) this.mesh.position.copy(this.position);
+    this.mesh?.position.copy(this.position);
   }
 
-  setNeighbor(dir, moduleId, type = 'rigid') {
+  /** Store neighbour reference & connection meta */
+  setNeighbor(dir, moduleId, {
+    type = 'rigid',             // 'rigid' | 'hinge' | 'rail-wagon'
+    mode = undefined,           // 'rail' | 'wagon' | undefined
+    strength = undefined        // Newtons, optional
+  } = {}) {
     this.neighbors[dir] = moduleId;
-    this.connectionType[dir] = type;
+    this.connectionType[dir] = { type, mode, strength };
   }
 }

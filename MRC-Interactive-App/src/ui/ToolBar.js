@@ -13,7 +13,7 @@ export function mount(parent) {
   root = document.createElement('div');
 /* absolute → inside #container;  top-12 (≈ 48 px) keeps it clear of nav */
 root.className = 
-          'absolute top-12 left-2 flex flex-col space-y-1 p-1 bg-gray-800 text-white rounded';
+          'absolute top-24 left-2 flex flex-col space-y-1 p-1 bg-gray-800 text-white rounded';
 
 Object.values(Tool).forEach(t => {
     const btn = document.createElement('button');

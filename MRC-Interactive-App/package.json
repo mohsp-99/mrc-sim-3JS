@@ -12,13 +12,13 @@
     "vite": "^6.3.3"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.4",
+    "@tailwindcss/vite": "^4.1.5",
     "cytoscape": "^3.31.2",
     "cytoscape-cose-bilkent": "^4.1.0",
     "cytoscape-cxtmenu": "^3.5.0",
     "jsoneditor": "^10.2.0",
     "mitt": "^3.0.1",
-    "tailwindcss": "^4.1.4",
+    "tailwindcss": "^4.1.5",
     "three": "^0.176.0"
   }
 }

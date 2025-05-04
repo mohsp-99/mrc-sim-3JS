@@ -10,34 +10,25 @@
 
   <!-- ───────────── Fixed top bar ───────────── -->
   <nav id="menubar"
-      class="fixed top-0 inset-x-0 z-30 h-10
-            bg-gray-800 text-white px-3 flex items-center select-none">
+      class="fixed top-0 inset-x-0 z-30 h-16
+            bg-gray-900 text-white px-6
+            flex items-center justify-between shadow-md">
 
-    <div class="flex space-x-4">
-      <button id="homeBtn"   class="hover:text-teal-300">Home</button>
-      <button id="configBtn" class="hover:text-teal-300">Config</button>
-      <button id="moveBtn"   class="hover:text-teal-300">Movement</button>
+    <div class="flex-1 flex justify-center gap-4 text-sm font-medium">
+      <button id="homeBtn" class="px-6 py-3 bg-yellow-900 rounded-md hover:bg-teal-800 hover:text-teal-300 text-lg font-medium border border-gray-700 shadow-lg transition">Home</button>
+      <button id="configBtn" class="px-6 py-3 bg-indigo-900 rounded-md hover:bg-teal-800 hover:text-teal-300 text-lg font-medium border border-gray-700 shadow-lg transition">Config Mode</button>
+      <button id="moveBtn" class="px-6 py-3 bg-teal-900 rounded-md hover:bg-indigo-800 hover:text-teal-300 text-lg font-medium border border-gray-700 shadow-lg transition">Free Movement</button>
+      <button id="goalBtn" class="px-6 py-3 bg-purple-900 rounded-md hover:bg-purple-800 hover:text-teal-300 text-lg font-medium border border-gray-700 shadow-lg transition">Goal Mode</button>
     </div>
 
-    <span class="ml-auto text-gray-400 text-sm">MRC Visualizer</span>
+    <span class="text-xs text-gray-400 tracking-wide pr-2">MRC Visualizer</span>
   </nav>
 
-
-  <!-- ───────────── Main mount area ─────────────
-       mt-10 = margin-top equal to nav height so nothing hides behind it -->
+  <!-- ───────────── Main content mount ───────────── -->
   <main id="root"
-       class="flex-1 flex items-center justify-center 
-              overflow-hidden mt-10"></main>
-              
-  <!-- (import map & main entry below remain unchanged) -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.module.min.js",
-        "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
-      }
-    }
-  </script>
+        class="flex-1 flex items-center justify-center 
+               overflow-hidden mt-12 px-4">
+  </main>
 
   <script type="module" src="/src/main.js"></script>
 </body>

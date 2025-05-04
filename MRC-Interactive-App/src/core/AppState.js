@@ -1,41 +1,50 @@
-// src/core/AppState.js   ← overwrite this file
-import bus from './EventBus.js';   // 👈 use the shared event bus
+// src/core/AppState.js
 
-/* ------------------------------------------------------------------
- *  Public constants
- * ------------------------------------------------------------------*/
-export const Modes = Object.freeze({
-  CONFIG: 'config',
-  MOVE  : 'move'
-});
+import ModuleGraph from '../engine/ModuleGraph.js';
+import bus from './EventBus.js';
+import SelectionManager from '../ui/SelectionManager.js';
 
-/* ------------------------------------------------------------------
- *  Private implementation – encapsulated finite-state machine
- * ------------------------------------------------------------------*/
-class AppState {
-  #mode = Modes.CONFIG;
+export const appState = {
+  // -------- Current app mode --------
+  mode        : 'home',
 
-  /* ----- query ----- */
-  get mode() { return this.#mode; }
+  // -------- Core structural data --------
+  modules     : new Map(),           // id → Module
+  graph       : new ModuleGraph(),   // Module connectivity
 
-  /* ----- transition ----- */
-  setMode(next) {
-    if (next === this.#mode) return;  // ignore redundant changes
-    this.#mode = next;
-    bus.emit('mode', this.#mode);     // broadcast change
-  }
+  // -------- Motion planning --------
+  trajectories: new Map(),           // id → [{ t, position }]
+  goal        : [],                  // Array of Module instances
+
+  // -------- View/UI state --------
+  viewState   : null,                // { position, lookAt }
+  selection   : new Set()            // Set of selected module IDs
+};
+
+// -------- Setters that emit events --------
+
+export function setMode(newMode) {
+  appState.mode = newMode;
+  bus.emit('modeChanged', newMode);
 }
 
-const instance = new AppState();
+export function setModules(modMap) {
+  appState.modules = modMap;
+  bus.emit('modulesUpdated', modMap);
+}
 
-/* ------------------------------------------------------------------
- *  Back-compat layer – old API stays functional
- * ------------------------------------------------------------------*/
-export const getMode = () => instance.mode;
-export const setMode = (m) => instance.setMode(m);
+export function setGoal(goalArray) {
+  appState.goal = goalArray;
+  bus.emit('goalUpdated', goalArray);
+}
 
-/* ------------------------------------------------------------------
- *  Exports
- * ------------------------------------------------------------------*/
-export { bus };          // optional: direct access to EventBus
-export default instance; // preferred singleton interface
+export function setSelection(selSet) {
+  appState.selection = selSet;
+  bus.emit('selectionChanged', selSet);
+}
+
+export function pushTrajectory(id, keyframe) {
+  if (!appState.trajectories.has(id)) appState.trajectories.set(id, []);
+  appState.trajectories.get(id).push(keyframe);
+  bus.emit('trajectoryUpdated', { id, keyframe });
+}
