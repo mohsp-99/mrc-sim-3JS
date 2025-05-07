@@ -12,6 +12,10 @@ import SceneManager from '../../core/SceneManager.js';
 import { setMode, appState } from '../../core/AppState.js';
 import { modeState } from './state/modeState.js';
 import bus from '../../core/EventBus.js';
+import { exportConfig } from './logic/exporter.js';
+import { initInspector, inspectModule, clearInspector } from './ui/inspector.js';
+import { mountControlPanel, unmountControlPanel } from '@/modes/config/ui/controlPanel.js';
+
 
 export function init() {
   const { canvasBox } = buildLayout();
@@ -20,7 +24,10 @@ export function init() {
 
   const selectionMgr = new SelectionManager(scene, appState.graph);
   SceneManager.setOnFrame(dt => selectionMgr.update(dt));
-
+  bus.on('selectionChanged', (selection) => {
+    selectionMgr.setSelection(selection); // ✅ updates visuals and internal state
+  });
+  
   const { addVoxel, delVoxel } = createPlacementHandlers(scene, objects, primitives.cubeGeo, primitives.cubeMaterial);
 
   const dom = SceneManager.getRenderer().domElement;
@@ -31,6 +38,7 @@ export function init() {
     addVoxel,
     delVoxel
   });
+  document.getElementById('exportBtn')?.addEventListener('click', exportConfig);
 
   modeState.moveLsnr = handlers.moveLsnr;
   modeState.downLsnr = handlers.downLsnr;
@@ -41,8 +49,21 @@ export function init() {
 
   mountToolBar(canvasBox);
   mountModuleBar(document.getElementById('moduleBarHost'));
+  mountControlPanel(); // ensure layout is already built
   initGraph('#cy', appState.graph);
 
+  initInspector();
+
+  bus.on('selectionChanged', (selection) => {
+    if (!selection || selection.size === 0) {
+      clearInspector();
+      return;
+    }
+
+    const mesh = Array.from(selection)[0];
+    const mod = appState.modules.get(mesh.__modId);
+    if (mod) inspectModule(mod);
+  });
   setMode('config');
 }
 
@@ -57,6 +78,8 @@ export function destroy() {
   stopAutosave(modeState.autosaveId);
   unmountToolBar();
   unmountModuleBar();
+  unmountControlPanel();
+
 
   const root = document.getElementById('root');
   root.innerHTML = '';

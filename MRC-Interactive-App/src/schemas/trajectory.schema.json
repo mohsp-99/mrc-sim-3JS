@@ -1,0 +1,8 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Trajectory",
+    "description": "WILL DEFINE LATER – placeholder so imports succeed.",
+    "type": "object",
+    "properties": {}
+  }
+  

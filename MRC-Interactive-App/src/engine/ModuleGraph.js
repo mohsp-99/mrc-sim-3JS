@@ -8,7 +8,7 @@ import { DIR } from './Module.js';
  */
 export default class ModuleGraph {
   constructor() {
-    this.modules = new Map();   // id -> Module
+    this.modules = new Map();   // id -> Module    
     this.parent  = new Map();   // Union-Find parent
     this.size    = new Map();   // root id -> component size
   }
@@ -74,4 +74,14 @@ export default class ModuleGraph {
   sameComponent(idA, idB) {
     return this._find(idA) === this._find(idB);
   }
+
+  removeModule(id) {
+    this.modules.delete(id);
+    this.parent.delete(id);
+    this.size.delete(id);
+  
+    // Optional: rebuild components if needed
+    // (only if you're doing component analysis like connected clusters)
+  }
+  
 }

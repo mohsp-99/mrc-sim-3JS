@@ -14,12 +14,16 @@ function addBottomToolbar(container) {
   const exportSection = createToolbarSection('bg-purple-600');
   
   const exportButton = createToolbarButton('Export', '#fff', 'bg-purple-700');
+  exportButton.id = 'exportBtn';
   exportButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
     </svg>
     Export
   `;
+  exportButton.classList += ' hover:bg-purple-500 ' +         /* nicer hover */
+                            'hover:scale-105 transition-transform';
+
   exportSection.appendChild(exportButton);
   toolbar.appendChild(exportSection);
   
@@ -29,6 +33,7 @@ function addBottomToolbar(container) {
   const historySection = createToolbarSection('bg-blue-600');
   
   const undoButton = createToolbarButton('Undo', '#fff', 'bg-blue-700');
+  undoButton.id = 'undoBtn';
   undoButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a4 4 0 0 1 4 4v2M3 10l6 6m-6-6l6-6" />
@@ -37,6 +42,8 @@ function addBottomToolbar(container) {
   historySection.appendChild(undoButton);
   
   const redoButton = createToolbarButton('Redo', '#fff', 'bg-blue-700');
+  redoButton.id = 'redoBtn';
+
   redoButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a4 4 0 0 0-4 4v2M21 10l-6 6m6-6l-6-6" />
@@ -51,6 +58,8 @@ function addBottomToolbar(container) {
   const selectionSection = createToolbarSection('bg-green-600');
   
   const selectAllButton = createToolbarButton('Select All', '#fff', 'bg-green-700');
+  selectAllButton.id = 'selectAllBtn';
+
   selectAllButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m-8 6H4m0 0l4 4m-4-4l4-4" />
@@ -65,6 +74,8 @@ function addBottomToolbar(container) {
   const clearSection = createToolbarSection('bg-red-600');
   
   const clearButton = createToolbarButton('Clear Canvas', '#fff', 'bg-red-700');
+  clearButton.id = 'clearBtn';
+  
   clearButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -136,6 +147,7 @@ function createToolbarButton(label, textColor, hoverBgColor) {
   cyDiv.id = 'cy';
   cyDiv.style.flexGrow = 1;
   cyDiv.style.minHeight = '100px';
+  cyDiv.style.height = '300'; // Added default height
   cyDiv.className = 'w-full bg-white border-b border-gray-300';
   rightPanel.appendChild(cyDiv);
 
@@ -147,7 +159,8 @@ function createToolbarButton(label, textColor, hoverBgColor) {
   const moduleBarHost = document.createElement('div');
   moduleBarHost.id = 'moduleBarHost';
   moduleBarHost.style.flexGrow = 1;
-  moduleBarHost.style.minHeight = '100px';
+  moduleBarHost.style.minHeight = '200px'; // Minimum height for module bar
+  moduleBarHost.style.height = '60%'; // Full height of the right panel
   moduleBarHost.className = 'w-full bg-gray-50';
   rightPanel.appendChild(moduleBarHost);
 

@@ -1,6 +1,7 @@
 // SelectionManager.js (config-specific)
 import * as THREE from 'three';
 import bus from '../../../core/EventBus.js';
+import { appState } from '../../../core/AppState.js';
 
 export class SelectionManager {
   constructor(scene, graph) {
@@ -15,27 +16,66 @@ export class SelectionManager {
     this._raycaster = new THREE.Raycaster();
     this._plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this._offset = new THREE.Vector3();
+
+    // Listen for programmatic selection updates
+    bus.on('selectionChanged', (selection) => {
+      this.setSelection(selection);
+    });
+
+    // Listen for keyboard delete or esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        this.deleteSelection();
+      } else if (e.key === 'Escape') {
+        this.clear();
+      }
+    });
   }
 
   setEnabled(flag) {
     this._enabled = !!flag;
   }
 
+  setSelection(selection) {
+    this.selected.forEach(m => this._setHighlight(m, false));
+    this.selected = selection;
+    this.selected.forEach(m => this._setHighlight(m, true));
+  }
+
   clear() {
     this.selected.forEach(m => this._setHighlight(m, false));
     this.selected.clear();
-    bus.emit('selectionChanged', this.selected);
+    bus.emit('selectionChanged', new Set());
   }
 
   deleteSelection() {
+    const deleted = [...this.selected].map(m => ({ mesh: m, pos: m.position.clone() }));
     this.selected.forEach(m => {
-      this.scene.remove(m);
-      m.geometry.dispose();
-      m.material.dispose();
-      this.graph?.modules.delete(m.__modId);
+      // Remove from scene
+      if (m.parent) m.parent.remove(m);
+      m.geometry?.dispose();
+      m.material?.dispose();
+
+      // Remove from app state and graph
+      const id = m.__modId;
+      appState.modules.delete(id);
+      this.graph?.removeModule?.(id);
     });
+    History.push({
+       label: 'Delete selection',
+       undo: () => {
+         deleted.forEach(({mesh, pos}) => {
+           scene.add(mesh);
+           mesh.position.copy(pos);
+           appState.modules.set(mesh.__modId, appState.modules.get(mesh.__modId) || /*restore*/null);
+           // you may need to re‑add to graph if required
+         });
+         refreshGraph(appState.graph);
+       },
+       redo: () => this.deleteSelection()
+     });
     this.selected.clear();
-    bus.emit('selectionChanged', this.selected);
+    bus.emit('selectionChanged', new Set());
   }
 
   update() {
