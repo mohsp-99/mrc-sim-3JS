@@ -17,8 +17,8 @@ Current release ships two modes:
 
 ```bash
 # 1.  clone & install
-git clone https://github.com/your-org/mrc-visualizer.git
-cd mrc-visualizer
+git clone https://github.com/mohsp-99/mrc-sim-3JS.git
+cd mrc-sim-3JS/MRC-Interactive-App
 npm install
 
 # 2.  start dev server (Vite)
