@@ -1,24 +1,27 @@
-import { buildLayout } from './layout.js';
-import { setupScene } from './state/setupScene.js';
-import { setupInteractions } from './state/setupInteractions.js';
-import { setupToolListeners, setupAutosave, stopAutosave } from './state/setupTools.js';
-import { mount as mountToolBar, unmount as unmountToolBar } from './ui/ToolBar.js';
-import { mount as mountModuleBar, unmount as unmountModuleBar } from './ui/ModuleBar.js';
-import { initGraph } from './ui/GraphView.js';
-import { createPlacementHandlers } from './logic/placement.js';
-import SelectionManager from './logic/SelectionManager.js';
+import { buildLayout }                                          from '@/modes/config/layout.js';
+import { setupScene }                                           from '@/modes/config/state/setupScene.js';
+import { setupInteractions }                                    from '@/modes/config/state/setupInteractions.js';
+import { setupToolListeners, setupAutosave, stopAutosave }      from '@/modes/config/state/setupTools.js';
+import { mount as mountToolBar, unmount as unmountToolBar }     from '@/modes/config/ui/ToolBar.js';
+import { mount as mountModuleBar, unmount as unmountModuleBar } from '@/modes/config/ui/ModuleBar.js';
+import { initGraph }                                            from '@/modes/config/ui/GraphView.js';
+import { createPlacementHandlers }                              from '@/modes/config/logic/placement.js';
+import SelectionManager                                         from '@/modes/config/logic/SelectionManager.js';
+import { modeState }                                            from '@/modes/config/state/modeState.js';
+import { exportConfig }                                         from '@/modes/config/logic/exporter.js';
+import { initInspector, inspectModule, clearInspector }         from '@/modes/config/ui/Inspector.js';
+import { mountControlPanel, unmountControlPanel }               from '@/modes/config/ui/ControlPanel.js';
+import { mountHomeButton, unmountHomeButton }                   from '@/modes/config/ui/HomeButton.js';
 
-import SceneManager from '../../core/SceneManager.js';
-import { setMode, appState } from '../../core/AppState.js';
-import { modeState } from './state/modeState.js';
-import bus from '../../core/EventBus.js';
-import { exportConfig } from './logic/exporter.js';
-import { initInspector, inspectModule, clearInspector } from './ui/inspector.js';
-import { mountControlPanel, unmountControlPanel } from '@/modes/config/ui/controlPanel.js';
+import SceneManager                                             from '@/core/SceneManager.js';
+import { setMode, appState }                                    from '@/core/AppState.js';
+import bus                                                      from '@/core/EventBus.js';
+
 
 
 export function init() {
   const { canvasBox } = buildLayout();
+  
   const { scene, objects, camera, controls, primitives } = setupScene(canvasBox);
   scene.userData.camera = camera;
 
@@ -47,6 +50,7 @@ export function init() {
   modeState.toolLsnr = setupToolListeners(controls, primitives.rollOverMesh, selectionMgr);
   modeState.autosaveId = setupAutosave(camera);
 
+  mountHomeButton();
   mountToolBar(canvasBox);
   mountModuleBar(document.getElementById('moduleBarHost'));
   mountControlPanel(); // ensure layout is already built
@@ -69,19 +73,28 @@ export function init() {
 
 export function destroy() {
   bus.off('toolChanged', modeState.toolLsnr);
+  bus.off('selectionChanged'); 
   document.removeEventListener('keydown', modeState.keyLsnr);
 
   const dom = SceneManager.getRenderer().domElement;
   dom.removeEventListener('pointermove', modeState.moveLsnr);
   dom.removeEventListener('pointerdown', modeState.downLsnr);
 
+  SceneManager.dispose?.();
+
   stopAutosave(modeState.autosaveId);
   unmountToolBar();
   unmountModuleBar();
   unmountControlPanel();
+  unmountHomeButton();
+
+  Object.keys(modeState).forEach(k => modeState[k] = null);
+
+  appState.modules.clear();
+  appState.graph.modules.clear();
 
 
   const root = document.getElementById('root');
   root.innerHTML = '';
-  root.classList.remove('items-center', 'justify-center');
+  root.className = '';
 }

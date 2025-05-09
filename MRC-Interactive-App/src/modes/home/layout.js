@@ -1,7 +1,7 @@
 export function buildHomeLayout(onConfig, onFree, onGoal, docUrl) {
     const host = document.getElementById('root');
     host.innerHTML = '';
-    host.classList.add('items-center', 'justify-center');
+    host.classList.add('flex', 'flex-col', 'items-center', 'justify-center', 'min-h-screen');
   
     const root = document.createElement('div');
     root.className = 'w-96 text-center space-y-6';

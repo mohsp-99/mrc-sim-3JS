@@ -21,6 +21,7 @@ import { setMode } from '../../core/AppState.js';
 
 import { mountModules,  unmountModules }        from './logic/ModuleRenderer.js';
 
+import { mountHomeButton, unmountHomeButton } from '@/modes/free/ui/HomeButton.js';
 
 export function init() {
   /* ---------- layout ---------- */
@@ -40,6 +41,7 @@ export function init() {
   mountTrajectoryViewer(regions.trajectoryViewer);
   mountStaticAnalysis(regions.staticAnalysis);
   mountWarningLog(regions.warningLog);
+  mountHomeButton();
 
   /* ---------- book‑keeping ---------- */
   setMode('free');
@@ -58,12 +60,15 @@ export function destroy() {
   unmountStaticAnalysis();
   unmountWarningLog();
   unmountModules();
-  
+  unmountHomeButton();
+
   modeState.resizeObs?.disconnect();
   window.removeEventListener('resize', modeState.winResize);
 
   /* clear DOM */
-  document.getElementById('root').innerHTML = '';
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  root.className = '';
   SceneManager.dispose?.();             // optional – if you added dispose()
   console.log('[Free‑move] destroyed');
 }

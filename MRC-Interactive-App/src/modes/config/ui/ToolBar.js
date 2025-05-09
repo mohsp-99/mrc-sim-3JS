@@ -6,7 +6,7 @@ let container;
 
 export function mount(parent) {
   container = document.createElement('div');
-  container.className = 'absolute top-4 left-4 z-10 bg-white rounded shadow p-2 flex gap-2';
+  container.className = 'absolute top-4 left-4 z-10 bg-white rounded shadow p-2 flex gap-4';
 
   const tools = [
     { tool: Tool.ADD,    label: '➕', title: 'Add (1)' },

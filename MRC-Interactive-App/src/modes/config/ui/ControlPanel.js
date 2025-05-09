@@ -2,7 +2,7 @@
 import toolState, { Tool } from '../ToolState.js';
 import { appState } from '../../../core/AppState.js';
 import bus from '../../../core/EventBus.js';
-import History from '../../../core/History.js';
+import History from '@/core/History.js';
 
 let root = null;
 

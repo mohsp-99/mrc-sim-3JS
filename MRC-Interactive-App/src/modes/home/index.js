@@ -11,8 +11,9 @@ export function init() {
   );
 }
 
+
 export function destroy() {
-  const host = document.getElementById('root');
-  host.innerHTML = '';
-  host.classList.remove('items-center', 'justify-center');
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  root.className = '';
 }

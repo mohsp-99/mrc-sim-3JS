@@ -137,6 +137,14 @@ const setOnFrame    = (cb) => { if (typeof cb === 'function') _onFrame = cb; };
 /* ────────────────────────────────────────────────────────────
  *  Export facade
  * ──────────────────────────────────────────────────────────── */
+function dispose() {
+  _renderer?.dispose();
+  _scene?.clear();
+  _objects.length = 0;
+  _onFrame = () => {};
+  _camera = _controls = _renderer = _scene = null;
+}
+
 export const SceneManager = {
   init,
   addMesh,
@@ -146,7 +154,9 @@ export const SceneManager = {
   getRenderer,
   getControls,
   getObjects,
-  getPrimitives
+  getPrimitives,
+  dispose
 };
+
 
 export default SceneManager;
